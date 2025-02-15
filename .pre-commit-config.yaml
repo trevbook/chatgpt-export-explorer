@@ -3,3 +3,19 @@ repos:
   rev: 0.8.1
   hooks:
     - id: nbstripout
+      stages: [pre-commit]
+      verbose: true
+
+- repo: https://github.com/psf/black
+  rev: 24.2.0
+  hooks:
+    - id: black
+      stages: [pre-commit]
+      verbose: true
+
+- repo: https://github.com/commitizen-tools/commitizen
+  rev: v3.13.0
+  hooks:
+    - id: commitizen
+      stages: [commit-msg]
+      verbose: true
