@@ -1,7 +1,7 @@
 [project]
-name = "chat-gpt-explorer-experiments"
+name = "chat-gpt-explorer-api"
 version = "0.1.0"
-description = "Experimental code for the export explorer"
+description = "API for Chat GPT Explorer"
 authors = [
     {name = "Trevor Hubbard",email = "trevormhubbard@gmail.com"}
 ]
