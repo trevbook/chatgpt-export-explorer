@@ -1,0 +1,11 @@
+ChatGPT Export Explorer is a local web application for analyzing and visualizing ChatGPT conversation history. The app processes exported ChatGPT JSON files, performs semantic clustering analysis, and provides interactive visualizations and analytics of conversation patterns.
+
+FRONTEND: Built with Next.js using the App Router and Server Components. Material UI provides the component library for consistent UI elements. The visualization layer uses deck.gl for high-performance WebGL-based scatterplots of conversation clusters. Zustand manages client-side state, particularly for upload progress and visualization settings. The frontend communicates with the backend through a RESTful API, handling file uploads and receiving processed conversation data.
+
+BACKEND: FastAPI powers the Python backend, providing async API endpoints for file processing, clustering, and analytics. Background tasks handle resource-intensive operations like JSON parsing and semantic analysis. SQLite serves as the primary database, storing normalized conversation data, message content, and clustering results. The database schema captures conversation metadata, individual messages, semantic embeddings, and clustering solutions.
+
+DATA PROCESSING: The application implements multiple clustering approaches (k-means, HDBSCAN, taxonomy-based) for semantic analysis of conversations. Raw ChatGPT JSON exports undergo a processing pipeline that normalizes data, generates embeddings, and computes analytics like token counts and temporal patterns. All processing happens locally, with progress reporting back to the frontend.
+
+DEPLOYMENT: Docker containerizes both frontend and backend services, managed via docker-compose for easy local deployment. Users run the application locally using `docker compose up -d`, accessing the web interface through their browser. The application is designed for offline use, with the only external communication being to OpenAI's API for embedding generation.
+
+ARCHITECTURE: The project follows a monorepo structure with clear separation between frontend (Next.js) and backend (FastAPI) services. The frontend emphasizes responsive, interactive visualizations while the backend focuses on efficient data processing and storage. SQLite provides a portable, zero-configuration database solution that maintains all data locally.

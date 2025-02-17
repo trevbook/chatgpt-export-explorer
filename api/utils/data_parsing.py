@@ -72,17 +72,24 @@ def extract_longest_conversation_df(mapping: dict) -> pd.DataFrame:
     return messages_df
 
 
-def extract_simple_conversation_markdown(conversation_df: pd.DataFrame) -> str:
+def extract_simple_conversation_markdown(
+    conversation_df: pd.DataFrame = None, mapping: dict = None
+) -> str:
     """
     Extracts a simple Markdown representation of a conversation between a user and an AI assistant.
     The output of the `extract_longest_conversation_df` function can be used as input to this function.
 
     Args:
-        conversation_df (pd.DataFrame): A DataFrame containing the conversation data
+        conversation_df (pd.DataFrame, optional): A DataFrame containing the conversation data. If not provided, mapping must be provided.
+        mapping (dict, optional): A dictionary mapping node IDs to node information. If provided, will be used to extract conversation DataFrame.
 
     Returns:
         str: A simple Markdown representation of the conversation
     """
+    if mapping is not None:
+        conversation_df = extract_longest_conversation_df(mapping)
+    elif conversation_df is None:
+        raise ValueError("Either conversation_df or mapping must be provided")
 
     # Filter out messages not from the assistant / user
     filtered_conversation_df = conversation_df.query(
@@ -115,7 +122,7 @@ def extract_simple_conversation_markdown(conversation_df: pd.DataFrame) -> str:
             )
 
         # If the message text is not None, add it to the markdown_lines list
-        if msg_text is not None or msg_text.strip() != "":
+        if msg_text is not None and msg_text.strip() != "":
             markdown_lines.append(f"# **{author_role.capitalize()}:**\n{msg_text}")
 
     # Join the markdown lines w/ newlines + `---` separator

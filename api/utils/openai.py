@@ -310,6 +310,7 @@ def generate_completions_in_parallel(
     max_tokens: int = 2_048,
     max_parallel_requests: int = 16,
     show_progress: bool = True,
+    tqdm_label: str = "Generating Completions",
     return_completion_costs: bool = False,
 ) -> Union[List[ChatCompletion], Tuple[List[ChatCompletion], float]]:
     """
@@ -323,6 +324,7 @@ def generate_completions_in_parallel(
         max_tokens (int): Maximum tokens per completion. Defaults to 2,048
         max_parallel_requests (int): Maximum number of parallel requests. Defaults to 16
         show_progress (bool): Whether to show progress bar. Defaults to True
+        tqdm_label (str): Label for the progress bar. Defaults to "Generating Completions"
         return_completion_costs (bool): Whether to return completion costs. Defaults to False
 
     Returns:
@@ -375,7 +377,7 @@ def generate_completions_in_parallel(
         for i, future in tqdm(
             iterable=futures.items(),
             total=len(futures),
-            desc="Generating Completions",
+            desc=tqdm_label,
             disable=not show_progress,
         ):
             completion, cost = future.result()
