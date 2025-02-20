@@ -7,8 +7,26 @@ This is the entrypoint to the FastAPI application.
 # =====
 # Below, we'll set up the rest of the file.
 
+# Set up logging first
+from utils.logging import configure_logging
+
+configure_logging()
+
+# General imports
+import json
+import logging
+
 # Third-party imports
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, BackgroundTasks, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+
+# Project imports
+from processing import ProcessingService
+from database import DatabaseManager
+from models import ProcessingStatus, ClusteringResults
+
+# Set up the logger
+logger = logging.getLogger(__name__)
 
 # ===================
 # CONFIGURING FASTAPI
@@ -22,13 +40,65 @@ app = FastAPI(
     version="0.1.0",
 )
 
+# Add CORS middleware for local deployment
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # ===================
 # DECLARING ENDPOINTS
 # ===================
 # Below, we'll declare different endpoints for the FastAPI app.
+# Initialize services
+logger.info("Initializing database and processing services")
+db = DatabaseManager("data/conversations.db")
+processor = ProcessingService(db)
 
 
-@app.get("/")
-async def root():
-    """Root endpoint that returns a hello world message."""
-    return {"message": "Hello World"}
+@app.post("/upload")
+async def upload_conversations(
+    file: UploadFile, background_tasks: BackgroundTasks
+) -> ProcessingStatus:
+    """Handle initial file upload and start processing"""
+    logger.info(f"Received file upload: {file.filename}")
+
+    if file.filename != "conversations.json":
+        logger.warning(f"Invalid filename: {file.filename}")
+        raise HTTPException(400, "Please upload a conversations.json file")
+
+    # Save file temporarily
+    logger.debug("Reading uploaded file content")
+    content = await file.read()
+    conversations = json.loads(content)
+    logger.info(f"Successfully parsed {len(conversations)} conversations")
+
+    # Start processing in background
+    logger.info("Starting background processing task")
+    background_tasks.add_task(processor.process_conversations, conversations)
+
+    return ProcessingStatus(
+        status="processing", message="Started processing conversations", progress=0
+    )
+
+
+@app.get("/status")
+async def get_processing_status() -> ProcessingStatus:
+    """Get current processing status"""
+    logger.debug("Getting current processing status")
+    return processor.get_status()
+
+
+@app.get("/conversations/clusters")
+async def get_clusters() -> ClusteringResults:
+    """Get clustering results"""
+    logger.debug("Retrieving clustering results")
+    if not db.has_data():
+        logger.warning("No conversation data found in database")
+        raise HTTPException(404, "No conversation data found")
+    results = db.get_clusters()
+    logger.info(f"Retrieved {len(results.clusters)} clusters")
+    return results

@@ -9,7 +9,6 @@ This module contains various utility functions related to parsing the ChatGPT ex
 
 # Third-party imports
 import pandas as pd
-from tqdm import tqdm
 
 # ================
 # DEFINING METHODS
