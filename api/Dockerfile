@@ -7,7 +7,11 @@ ENV PYTHONDONTWRITEBYTECODE 1 \
     PYTHONPATH=/app \
     # Add environment variables for worker configuration
     WEB_CONCURRENCY=4 \
-    MAX_WORKERS=4
+    MAX_WORKERS=4 \
+    # Add timeout configurations
+    TIMEOUT=1800 \
+    GRACEFUL_TIMEOUT=300 \
+    KEEPALIVE=5
 
 # Install Poetry
 RUN pip install poetry gunicorn
@@ -23,11 +27,12 @@ RUN poetry config virtualenvs.create false \
 # Copy the application code
 # COPY . .
 
-# Use Gunicorn with single Uvicorn worker
+# Use Gunicorn with single Uvicorn worker and increased timeouts
 CMD ["gunicorn", "main:app", \
     "--workers", "1", \
     "--worker-class", "uvicorn.workers.UvicornWorker", \
     "--bind", "0.0.0.0:8000", \
-    "--timeout", "300", \
+    "--timeout", "1800", \
+    "--graceful-timeout", "300", \
     "--keep-alive", "5", \
     "--log-level", "info"]
