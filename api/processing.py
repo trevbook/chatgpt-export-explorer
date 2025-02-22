@@ -43,11 +43,37 @@ class ProcessingService:
     def __init__(self, db_manager):
         """Initialize the processing service with a database manager"""
         self.db = db_manager
-        self._status = {"status": "idle", "message": "", "progress": 0}
+        self.status_file = "data/processing_status.json"
+        self._initialize_status()
         self._umap = None
         self._llm_utils = None
         self._openai_utils = None
         self._cluster_utils = None
+
+    def _initialize_status(self):
+        """Initialize or reset the status file"""
+        initial_status = {"status": "idle", "message": "", "progress": 0}
+        self._update_status_file(initial_status)
+
+    def _update_status_file(self, status_data: Dict[str, Any]):
+        """Update the status file with new status information"""
+        try:
+            with open(self.status_file, "w") as f:
+                json.dump(status_data, f)
+        except Exception as e:
+            logger.error(f"Error updating status file: {e}")
+
+    def get_status(self) -> Dict[str, Any]:
+        """Get current processing status from file"""
+        try:
+            with open(self.status_file, "r") as f:
+                return json.load(f)
+        except FileNotFoundError:
+            self._initialize_status()
+            return self.get_status()
+        except Exception as e:
+            logger.error(f"Error reading status file: {e}")
+            return {"status": "error", "message": str(e), "progress": 0}
 
     @property
     @lru_cache()
@@ -80,7 +106,7 @@ class ProcessingService:
             self._cluster_utils = import_module("utils.clusters")
         return self._cluster_utils
 
-    async def process_conversations(self, conversations: list):
+    def process_conversations(self, conversations: list):
         """
         Process conversations in background, including parsing, embedding generation,
         and clustering analysis.
@@ -90,11 +116,13 @@ class ProcessingService:
         """
         try:
             # Update status as processing progresses
-            self._status = {
-                "status": "processing",
-                "message": "Parsing conversations",
-                "progress": 10,
-            }
+            self._update_status_file(
+                {
+                    "status": "processing",
+                    "message": "Parsing conversations",
+                    "progress": 10,
+                }
+            )
             logger.info("Status updated: Parsing conversations (10%)")
 
             # Initialize database tables
@@ -143,11 +171,13 @@ class ProcessingService:
                     conversations_data_to_insert,
                 )
 
-            self._status = {
-                "status": "processing",
-                "message": "Generating embeddings",
-                "progress": 40,
-            }
+            self._update_status_file(
+                {
+                    "status": "processing",
+                    "message": "Generating embeddings",
+                    "progress": 40,
+                }
+            )
             logger.info("Status updated: Generating embeddings (40%)")
 
             # Enrich conversations with LLM summaries and tags
@@ -218,11 +248,9 @@ class ProcessingService:
                     conversations_data_to_insert,
                 )
 
-            self._status = {
-                "status": "processing",
-                "message": "Clustering data",
-                "progress": 70,
-            }
+            self._update_status_file(
+                {"status": "processing", "message": "Clustering data", "progress": 70}
+            )
             logger.info("Status updated: Clustering data (70%)")
 
             # Generate clusters
@@ -314,22 +342,17 @@ class ProcessingService:
                     clusters_data_to_insert,
                 )
 
-            self._status = {
-                "status": "complete",
-                "message": "Processing complete",
-                "progress": 100,
-            }
+            self._update_status_file(
+                {
+                    "status": "complete",
+                    "message": "Processing complete",
+                    "progress": 100,
+                }
+            )
             logger.info("Status updated: Processing complete (100%)")
 
         except Exception as e:
-            self._status = {"status": "error", "message": str(e), "progress": 0}
+            self._update_status_file(
+                {"status": "error", "message": str(e), "progress": 0}
+            )
             logger.error(f"Processing error: {str(e)}")
-
-    def get_status(self) -> Dict[str, Any]:
-        """
-        Get current processing status.
-
-        Returns:
-            Dict[str, Any]: Dictionary containing status, message and progress
-        """
-        return self._status

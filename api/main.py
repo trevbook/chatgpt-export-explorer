@@ -15,6 +15,9 @@ configure_logging()
 # General imports
 import json
 import logging
+from multiprocessing import Process
+import concurrent
+import asyncio
 
 # Third-party imports
 from fastapi import FastAPI, UploadFile, BackgroundTasks, HTTPException
@@ -66,18 +69,12 @@ async def upload_conversations(
     """Handle initial file upload and start processing"""
     logger.info(f"Received file upload: {file.filename}")
 
-    if file.filename != "conversations.json":
-        logger.warning(f"Invalid filename: {file.filename}")
-        raise HTTPException(400, "Please upload a conversations.json file")
-
     # Save file temporarily
-    logger.debug("Reading uploaded file content")
     content = await file.read()
     conversations = json.loads(content)
-    logger.info(f"Successfully parsed {len(conversations)} conversations")
 
-    # Start processing in background
-    logger.info("Starting background processing task")
+    # Start processing in background task
+    logger.info("Starting processing in background task")
     background_tasks.add_task(processor.process_conversations, conversations)
 
     return ProcessingStatus(
@@ -88,17 +85,20 @@ async def upload_conversations(
 @app.get("/status")
 async def get_processing_status() -> ProcessingStatus:
     """Get current processing status"""
-    logger.debug("Getting current processing status")
     return processor.get_status()
 
 
 @app.get("/conversations/clusters")
 async def get_clusters() -> ClusteringResults:
     """Get clustering results"""
-    logger.debug("Retrieving clustering results")
     if not db.has_data():
         logger.warning("No conversation data found in database")
         raise HTTPException(404, "No conversation data found")
     results = db.get_clusters()
-    logger.info(f"Retrieved {len(results.clusters)} clusters")
     return results
+
+
+@app.get("/has-data")
+async def check_data_exists() -> bool:
+    """Check if any conversation data exists in the database"""
+    return db.has_data()

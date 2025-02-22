@@ -96,16 +96,20 @@ class DatabaseManager:
 
         Returns:
             bool: True if there are conversations in the database, False otherwise.
+            Returns False if conversations table doesn't exist.
         """
         logger.debug("Checking if database has any processed conversations")
         sqlite3 = get_sqlite3()
-        # Open a connection to the database
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.cursor()
-            result = cursor.execute("SELECT COUNT(*) FROM conversations").fetchone()
-            has_data = result[0] > 0
-            logger.debug(f"Database has data: {has_data}")
-            return has_data
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                result = cursor.execute("SELECT COUNT(*) FROM conversations").fetchone()
+                has_data = result[0] > 0
+                logger.debug(f"Database has data: {has_data}")
+                return has_data
+        except sqlite3.OperationalError:
+            logger.debug("Conversations table does not exist")
+            return False
 
     def get_clusters(self) -> ClusteringResults:
         """
