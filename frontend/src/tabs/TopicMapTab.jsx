@@ -19,6 +19,6 @@ import { Typography } from "@mui/material";
  * We'll render the ScatterplotTab component here.
  */
 
-export default function ScatterplotTab() {
-  return <Typography variant="h4">Scatterplot Tab</Typography>;
+export default function TopicMapTab() {
+  return <Typography>Scatterplot Tab</Typography>;
 }

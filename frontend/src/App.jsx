@@ -1,31 +1,40 @@
-import { useState, useEffect } from "react";
-import { Tabs, Tab, Box, CircularProgress } from "@mui/material";
-import { checkDataExists } from "./api";
-import UploadTab from "./tabs/UploadTab";
-import ScatterplotTab from "./tabs/ScatterplotTab";
+/**
+ * This is the main application component that renders the app.
+ *
+ * @returns {JSX.Element} The App component
+ */
+
+/**
+ * ===============
+ * COMPONENT SETUP
+ * ===============
+ * Below, we'll set up the App component.
+ */
+import { Box, CircularProgress, Tab, Tabs } from "@mui/material";
+import { useState } from "react";
+import { useStore } from "./stores";
+import { useDataCheck } from "./hooks";
+import TopicMapTab from "./tabs/TopicMapTab";
+import ImportTab from "./tabs/ImportTab";
+
+/**
+ * ===============
+ * RENDERING LOGIC
+ * ===============
+ * We'll render the App component here.
+ */
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState("upload");
-  const [hasData, setHasData] = useState(false);
+  const activeTab = useStore((state) => state.activeTab);
+  const setActiveTab = useStore((state) => state.setActiveTab);
+  const hasData = useStore((state) => state.hasData);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const checkData = async () => {
-      try {
-        const exists = await checkDataExists();
-        setHasData(exists);
-        // If no data exists, force user to upload tab
-        if (!exists) {
-          setActiveTab("upload");
-        }
-      } catch (error) {
-        console.error("Error checking data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  useDataCheck();
 
-    checkData();
+  // Once data check is complete, we can stop loading
+  useState(() => {
+    setIsLoading(false);
   }, []);
 
   const handleTabChange = (event, newValue) => {
@@ -50,21 +59,28 @@ export default function App() {
   }
 
   return (
-    <Box sx={{ width: "100%" }}>
+    <Box
+      sx={{
+        width: "100%",
+        height: "95vh",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         <Tabs
           value={activeTab}
           onChange={handleTabChange}
           aria-label="chat analysis tabs"
         >
-          <Tab value="upload" label="Upload Data" />
-          <Tab value="scatterplot" label="Scatterplot" disabled={!hasData} />
+          <Tab value="upload" label="Import Data" />
+          <Tab value="topic-map" label="Topic Map" disabled={!hasData} />
         </Tabs>
       </Box>
 
-      <Box sx={{ p: 3 }}>
-        {activeTab === "upload" && <UploadTab />}
-        {activeTab === "scatterplot" && <ScatterplotTab />}
+      <Box sx={{ p: 3, flexGrow: 1, height: 0 }}>
+        {activeTab === "upload" && <ImportTab />}
+        {activeTab === "topic-map" && <TopicMapTab />}
       </Box>
     </Box>
   );
