@@ -28,7 +28,7 @@ import { create } from "zustand";
 export const useStore = create((set) => ({
   // ACTIVE TAB
   // The actively selected tab
-  activeTab: "upload",
+  activeTab: "welcome",
   setActiveTab: (tab) => set({ activeTab: tab }),
 
   // HAS DATA

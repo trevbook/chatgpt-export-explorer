@@ -16,6 +16,7 @@ import { useStore } from "./stores";
 import { useDataCheck } from "./hooks";
 import TopicMapTab from "./tabs/TopicMapTab/TopicMapTab";
 import ImportTab from "./tabs/ImportTab";
+import WelcomeTab from "./tabs/WelcomeTab";
 
 /**
  * ===============
@@ -38,8 +39,8 @@ export default function App() {
   }, []);
 
   const handleTabChange = (value) => {
-    // Prevent switching away from upload tab if no data exists
-    if (!hasData && value !== "upload") {
+    // Allow switching to the welcome tab even if no data exists
+    if (!hasData && value !== "upload" && value !== "welcome") {
       return;
     }
     setActiveTab(value);
@@ -71,6 +72,7 @@ export default function App() {
     >
       <Tabs value={activeTab} onChange={handleTabChange}>
         <Tabs.List>
+          <Tabs.Tab value="welcome">Welcome</Tabs.Tab>
           <Tabs.Tab value="upload">Import Data</Tabs.Tab>
           <Tabs.Tab value="topic-map" disabled={!hasData}>
             Topic Map
@@ -79,6 +81,7 @@ export default function App() {
       </Tabs>
 
       <Box style={{ padding: "1rem", flexGrow: 1, height: 0 }}>
+        {activeTab === "welcome" && <WelcomeTab />}
         {activeTab === "upload" && <ImportTab />}
         {activeTab === "topic-map" && <TopicMapTab />}
       </Box>

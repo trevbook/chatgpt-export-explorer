@@ -41,7 +41,7 @@ export const useDataCheck = () => {
       }
     };
 
-    if (activeTab === "upload") {
+    if (activeTab === "upload" || activeTab === "welcome") {
       checkData();
     }
   }, [activeTab, setHasData]);

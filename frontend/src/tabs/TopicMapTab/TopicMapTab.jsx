@@ -71,7 +71,7 @@ export default function TopicMapTab() {
     <Radio.Card
       style={{
         position: "relative",
-        padding: "var(--mantine-spacing-md)",
+        padding: "var(--mantine-spacing-sm)",
         transition: "border-color 150ms ease",
         borderColor:
           item.value === scatterplotView
@@ -93,7 +93,7 @@ export default function TopicMapTab() {
             style={{
               fontWeight: "bold",
               fontSize: "var(--mantine-font-size-md)",
-              lineHeight: 1.3,
+              lineHeight: 1.2,
               color: "var(--mantine-color-bright)",
             }}
           >
@@ -101,7 +101,7 @@ export default function TopicMapTab() {
           </Text>
           <Text
             style={{
-              marginTop: "8px",
+              marginTop: "4px",
               color: "var(--mantine-color-dimmed)",
               fontSize: "var(--mantine-font-size-xs)",
             }}
