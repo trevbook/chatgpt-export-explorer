@@ -12,8 +12,8 @@
  */
 import { useEffect } from "react";
 import { Box, Select, Radio, Group, Text } from "@mantine/core";
-import { useStore } from "../../stores";
-import { getClusterSolutions } from "../../api";
+import { useStore } from "../../store";
+import { getClusterSolutions, getClustersInSolution } from "../../api";
 import Scatterplot from "./Scatterplot";
 
 /**
@@ -34,6 +34,8 @@ export default function TopicMapTab() {
   );
   const scatterplotView = useStore((state) => state.scatterplotView);
   const setScatterplotView = useStore((state) => state.setScatterplotView);
+  const clusterDataCache = useStore((state) => state.clusterDataCache);
+  const setClusterDataCache = useStore((state) => state.setClusterDataCache);
 
   useEffect(() => {
     // Fetch cluster solutions if we don't have any
@@ -48,6 +50,28 @@ export default function TopicMapTab() {
         });
     }
   }, [clusterSolutions.length, setClusterSolutions]);
+
+  useEffect(() => {
+    if (activeClusterSolutionId !== null) {
+      const cacheKey = `${activeClusterSolutionId}-${scatterplotView}`;
+      if (!clusterDataCache[cacheKey]) {
+        // Fetch data if not cached
+        getClustersInSolution(activeClusterSolutionId)
+          .then((data) => {
+            console.log("Received cluster data:", data);
+            setClusterDataCache(activeClusterSolutionId, scatterplotView, data);
+          })
+          .catch((err) => {
+            console.error("Error fetching cluster data:", err);
+          });
+      }
+    }
+  }, [
+    activeClusterSolutionId,
+    scatterplotView,
+    clusterDataCache,
+    setClusterDataCache,
+  ]);
 
   const handleSolutionChange = (value) => {
     setActiveClusterSolutionId(value);

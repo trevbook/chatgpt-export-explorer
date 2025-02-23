@@ -11,7 +11,7 @@
  * Below, we'll set up the Scatterplot component.
  */
 import { Box, Text } from "@mantine/core";
-import { useStore } from "../../stores";
+import { useStore } from "../../store";
 
 /**
  * ===============

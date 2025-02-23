@@ -12,7 +12,7 @@
 
 import { useEffect } from "react";
 import { checkDataExists } from "./api";
-import { useStore } from "./stores";
+import { useStore } from "./store";
 
 /**
  * ===============

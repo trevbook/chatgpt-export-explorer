@@ -86,13 +86,23 @@ async def get_processing_status() -> ProcessingStatus:
     return processor.get_status()
 
 
-@app.get("/conversations/clusters")
-async def get_clusters() -> ClusteringResults:
-    """Get clustering results"""
+@app.get("/conversations/clusters-in-solution/{clustering_solution_id}")
+async def get_clusters_in_solution(clustering_solution_id: str) -> ClusteringResults:
+    """Get clustering results for a specific solution
+
+    Args:
+        clustering_solution_id: ID of the clustering solution to retrieve
+
+    Returns:
+        ClusteringResults: Object containing cluster metrics and metadata
+
+    Raises:
+        HTTPException: If no conversation data exists in database
+    """
     if not db.has_data():
         logger.warning("No conversation data found in database")
         raise HTTPException(404, "No conversation data found")
-    results = db.get_clusters()
+    results = db.get_clusters_in_solution(clustering_solution_id)
     return results
 
 

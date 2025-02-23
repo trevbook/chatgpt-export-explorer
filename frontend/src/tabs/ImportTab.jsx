@@ -17,7 +17,7 @@ import {
   uploadConversations,
   getProcessingStatus,
 } from "../api";
-import { useStore } from "../stores";
+import { useStore } from "../store";
 
 const UploadBox = ({ children, ...props }) => (
   <Paper

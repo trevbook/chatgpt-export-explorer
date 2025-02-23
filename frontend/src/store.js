@@ -47,4 +47,23 @@ export const useStore = create((set) => ({
   // State to manage the selected scatterplot view
   scatterplotView: "cluster", // default to "cluster"
   setScatterplotView: (view) => set({ scatterplotView: view }),
+
+  // CLUSTER DATA CACHE
+  // State for caching cluster data based on solution ID and view
+  clusterDataCache: {},
+
+  /**
+   * Sets the cluster data cache for a specific solution and view.
+   *
+   * @param {string} solutionId - The ID of the cluster solution.
+   * @param {string} view - The view type (e.g., "cluster" or "document").
+   * @param {object} data - The data to cache.
+   */
+  setClusterDataCache: (solutionId, view, data) =>
+    set((state) => ({
+      clusterDataCache: {
+        ...state.clusterDataCache,
+        [`${solutionId}-${view}`]: data,
+      },
+    })),
 }));

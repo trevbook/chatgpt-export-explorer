@@ -80,6 +80,32 @@ export const getProcessingStatus = async () => {
  * @throws {Error} If no conversation data exists or if request fails
  */
 export const getClusterSolutions = async () => {
-  const response = await axios.get(`${API_URL}/conversations/cluster-solutions`);
+  const response = await axios.get(
+    `${API_URL}/conversations/cluster-solutions`
+  );
   return response.data;
+};
+
+/**
+ * Fetches the clusters for a specific clustering solution from the backend.
+ * Makes a GET request to /conversations/clusters-in-solution/:clusteringSolutionId to get clusters.
+ *
+ * @async
+ * @param {string} clusteringSolutionId - The ID of the clustering solution
+ * @returns {Promise<Object>} Clustering results for the specified solution
+ * @throws {Error} If no conversation data exists or if request fails
+ */
+export const getClustersInSolution = async (clusteringSolutionId) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/conversations/clusters-in-solution/${clusteringSolutionId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      `Error fetching clusters for solution ${clusteringSolutionId}:`,
+      error
+    );
+    throw error;
+  }
 };

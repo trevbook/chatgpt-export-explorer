@@ -16,7 +16,7 @@ from functools import lru_cache
 from typing import List
 
 # Project imports
-from models import ClusteringResults
+from models import ClusteringResults, ClusterMetrics
 
 # Set up the logger
 logger = logging.getLogger(__name__)
@@ -112,27 +112,30 @@ class DatabaseManager:
             logger.debug("Conversations table does not exist")
             return False
 
-    def get_clusters(self) -> ClusteringResults:
+    def get_clusters_in_solution(
+        self, clustering_solution_id: str
+    ) -> ClusteringResults:
         """
-        Get clustering results from the database.
+        Get clustering results from the database for a specific clustering solution.
+
+        Args:
+            clustering_solution_id (str): The ID of the clustering solution to retrieve.
 
         Returns:
             ClusteringResults: Object containing cluster metrics and metadata
         """
-        logger.info("Retrieving clustering results from database")
+        logger.info(
+            f"Retrieving clustering results for solution {clustering_solution_id} from database"
+        )
         sqlite3 = get_sqlite3()
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
 
-            logger.debug("Executing query to get latest clustering solution")
+            logger.debug(
+                f"Executing query to get clustering solution {clustering_solution_id}"
+            )
             cursor.execute(
                 """
-                WITH latest_solution AS (
-                    SELECT cluster_solution_id 
-                    FROM clusters 
-                    ORDER BY cluster_solution_id DESC 
-                    LIMIT 1
-                )
                 SELECT 
                     cluster_id,
                     conversation_ids,
@@ -148,12 +151,12 @@ class DatabaseManager:
                     centroid_umap_y,
                     cluster_solution_id
                 FROM clusters
-                WHERE cluster_solution_id = (SELECT cluster_solution_id FROM latest_solution)
-                """
+                WHERE cluster_solution_id = ?
+                """,
+                (clustering_solution_id,),
             )
 
             clusters = []
-            cluster_solution_id = None
             logger.debug("Processing query results")
             for row in cursor.fetchall():
                 clusters.append(
@@ -172,14 +175,12 @@ class DatabaseManager:
                         "centroid_umap_y": row[11],
                     }
                 )
-                if cluster_solution_id is None:
-                    cluster_solution_id = row[12]
 
             logger.info(
-                f"Retrieved {len(clusters)} clusters from solution {cluster_solution_id}"
+                f"Retrieved {len(clusters)} clusters from solution {clustering_solution_id}"
             )
             return ClusteringResults(
-                cluster_solution_id=cluster_solution_id, clusters=clusters
+                cluster_solution_id=clustering_solution_id, clusters=clusters
             )
 
     def get_cluster_solutions(self) -> List[dict]:
