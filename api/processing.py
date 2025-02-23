@@ -115,15 +115,9 @@ class ProcessingService:
             conversations (list): List of conversation data to process
         """
         try:
-            # Update status as processing progresses
-            self._update_status_file(
-                {
-                    "status": "processing",
-                    "message": "Parsing conversations",
-                    "progress": 10,
-                }
-            )
-            logger.info("Status updated: Parsing conversations (10%)")
+
+            # Determine the number of conversations
+            n_conversations = len(conversations)
 
             # Initialize database tables
             self.db.initialize_database()
@@ -146,6 +140,15 @@ class ProcessingService:
                     ),
                 }
                 conversations_data_to_insert.append(cur_conversation_data)
+
+            # Update status as processing progresses
+            self._update_status_file(
+                {
+                    "status": "processing",
+                    "message": "Parsing conversations",
+                    "progress": 5,
+                }
+            )
 
             # Insert initial conversation data
             with sqlite3.connect(self.db.db_path) as conn:
@@ -171,19 +174,26 @@ class ProcessingService:
                     conversations_data_to_insert,
                 )
 
-            self._update_status_file(
-                {
-                    "status": "processing",
-                    "message": "Generating embeddings",
-                    "progress": 40,
-                }
-            )
-            logger.info("Status updated: Generating embeddings (40%)")
-
             # Enrich conversations with LLM summaries and tags
+            def llm_conversation_enrichment_progress_manager(completed_items: int):
+                # Calculate percentage complete (5-25% range)
+                percent_complete = 5 + (completed_items / n_conversations) * 20
+                # Only call progress_callback when we hit another 10% increment
+                if int(percent_complete / 1) > int(
+                    (5 + ((completed_items - 1) / n_conversations * 20)) / 1
+                ):
+                    self._update_status_file(
+                        {
+                            "status": "processing",
+                            "message": f"Enriching conversations with LLM summaries and tags ({completed_items:,}/{n_conversations:,})",
+                            "progress": int(percent_complete),
+                        }
+                    )
+
             llm_enriched_conversations_df = self.llm_utils.enrich_conversations_with_summaries_and_tags(
                 conversations_df=pd.DataFrame(conversations_data_to_insert),
                 max_chars_per_conversation_context=settings.MAX_CHARS_PER_CONVERSATION_CONTEXT,
+                progress_callback=llm_conversation_enrichment_progress_manager,
             )
 
             # Update conversations with summaries and tags
@@ -207,18 +217,52 @@ class ProcessingService:
                     conversations_data_to_insert,
                 )
 
+            # Update status as processing progresses
+            self._update_status_file(
+                {
+                    "status": "processing",
+                    "message": "Generating conversation embeddings",
+                    "progress": 25,
+                }
+            )
+
+            def openai_embedding_progress_manager(completed_items: int):
+                # Calculate percentage complete (25-75% range)
+                percent_complete = 25 + (completed_items / n_conversations) * 50
+                # Only call progress_callback when we hit another 10% increment
+                if int(percent_complete / 1) > int(
+                    ((completed_items - 1) / n_conversations * 50) / 1
+                ):
+                    self._update_status_file(
+                        {
+                            "status": "processing",
+                            "message": f"Generating conversation embeddings ({completed_items:,}/{n_conversations:,})",
+                            "progress": int(percent_complete),
+                        }
+                    )
+
             # Generate embeddings
             embs = self.openai_utils.generate_embeddings_for_texts(
                 text_list=[
                     f"{row.title}\nTags: {', '.join(row.tags)}\nSummary: {row.summary}\nConversation: {row.messages_markdown[:settings.MAX_CHARS_PER_CONVERSATION_CONTEXT]}"
                     for row in llm_enriched_conversations_df.itertuples()
-                ]
+                ],
+                progress_callback=openai_embedding_progress_manager,
             )
 
             conversation_emb_df = llm_enriched_conversations_df.copy()[
                 ["conversation_id"]
             ]
             conversation_emb_df["embedding"] = embs.tolist()
+
+            # Update status as processing progresses
+            self._update_status_file(
+                {
+                    "status": "processing",
+                    "message": "Clustering conversations",
+                    "progress": 50,
+                }
+            )
 
             # Generate UMAP projections
             umap_model = self.umap(n_components=2)
@@ -248,11 +292,6 @@ class ProcessingService:
                     conversations_data_to_insert,
                 )
 
-            self._update_status_file(
-                {"status": "processing", "message": "Clustering data", "progress": 70}
-            )
-            logger.info("Status updated: Clustering data (70%)")
-
             # Generate clusters
             n_clusters = min(math.ceil(math.sqrt(len(conversation_emb_df))), 24)
 
@@ -272,10 +311,35 @@ class ProcessingService:
                 np.stack(cluster_metrics_df.embedding_centroid)
             )
 
+            # Update status as processing progresses
+            self._update_status_file(
+                {
+                    "status": "processing",
+                    "message": "Labeling clusters",
+                    "progress": 75,
+                }
+            )
+
+            def llm_cluster_enrichment_progress_manager(completed_items: int):
+                # Calculate percentage complete (75-100% range)
+                percent_complete = 75 + (completed_items / n_clusters) * 25
+                # Only call progress_callback when we hit another 10% increment
+                if int(percent_complete / 1) > int(
+                    ((completed_items - 1) / n_clusters * 25) / 1
+                ):
+                    self._update_status_file(
+                        {
+                            "status": "processing",
+                            "message": f"Labeling clusters ({completed_items:,}/{n_clusters:,})",
+                            "progress": int(percent_complete),
+                        }
+                    )
+
             # Label clusters using LLM
             labeled_clusters_df = self.llm_utils.label_conversation_clusters(
                 conversations_df=llm_enriched_conversations_df,
                 cluster_metrics_df=cluster_metrics_df,
+                progress_callback=llm_cluster_enrichment_progress_manager,
             )
 
             # Insert cluster data
@@ -342,6 +406,7 @@ class ProcessingService:
                     clusters_data_to_insert,
                 )
 
+            # Update status as processing completes
             self._update_status_file(
                 {
                     "status": "complete",
@@ -349,7 +414,6 @@ class ProcessingService:
                     "progress": 100,
                 }
             )
-            logger.info("Status updated: Processing complete (100%)")
 
         except Exception as e:
             self._update_status_file(

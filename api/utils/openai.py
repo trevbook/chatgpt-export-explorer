@@ -11,7 +11,7 @@ This module contains various utility functions related to the OpenAI APIs.
 import json
 import time
 import random
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union, Callable
 from concurrent.futures import ThreadPoolExecutor
 
 # Third-party import statements
@@ -181,6 +181,7 @@ def generate_embeddings_for_texts(
     max_parallel_requests: int = 16,
     max_tokens_per_batch: int = 8_191,
     show_progress: bool = True,
+    progress_callback: Optional[Callable[[int], None]] = None,
 ) -> np.ndarray:
     """
     This function generates embeddings for a list of texts using an OpenAI embedding model.
@@ -192,6 +193,8 @@ def generate_embeddings_for_texts(
         max_parallel_requests (int): The maximum number of parallel requests to make to the OpenAI API.
         max_tokens_per_batch (int): The maximum number of tokens per batch.
         show_progress (bool): Whether to show a progress bar.
+        progress_callback (Optional[Callable[[int], None]]): Optional callback function to report progress.
+            Callback function should accept an integer representing completed items.
 
     Returns:
         np.ndarray: An array of embeddings for the texts.
@@ -289,6 +292,8 @@ def generate_embeddings_for_texts(
 
             if res is not None:
                 results[i] = res
+                if progress_callback:
+                    progress_callback(i + 1)
             else:
                 raise ValueError("An error occurred while generating embeddings.")
 
@@ -312,6 +317,7 @@ def generate_completions_in_parallel(
     show_progress: bool = True,
     tqdm_label: str = "Generating Completions",
     return_completion_costs: bool = False,
+    progress_callback: Optional[Callable[[int], None]] = None,
 ) -> Union[List[ChatCompletion], Tuple[List[ChatCompletion], float]]:
     """
     Generates completions in parallel for multiple prompts using ThreadPoolExecutor.
@@ -326,6 +332,8 @@ def generate_completions_in_parallel(
         show_progress (bool): Whether to show progress bar. Defaults to True
         tqdm_label (str): Label for the progress bar. Defaults to "Generating Completions"
         return_completion_costs (bool): Whether to return completion costs. Defaults to False
+        progress_callback (Optional[Callable[[int], None]]): Optional callback function to report progress.
+            Callback function should accept an integer representing completed items.
 
     Returns:
         Union[List[ChatCompletion], Tuple[List[ChatCompletion], float]]:
@@ -373,6 +381,8 @@ def generate_completions_in_parallel(
         for i, (messages, response_format) in enumerate(message_format_pairs):
             futures[i] = executor.submit(_completion_helper, messages, response_format)
 
+        completed_items = 0
+
         # Collect the results
         for i, future in tqdm(
             iterable=futures.items(),
@@ -385,6 +395,10 @@ def generate_completions_in_parallel(
             if completion is not None:
                 results[i] = completion
                 completion_costs[i] = cost
+
+                completed_items += 1
+                if progress_callback:
+                    progress_callback(completed_items)
             else:
                 raise ValueError("An error occurred while generating completion.")
 

@@ -8,8 +8,9 @@ This module contains various utility functions related to using LLMs for enrichi
 # Below, we'll set up the rest of the file.
 
 # General imports
+import logging
 import json
-from typing import List
+from typing import List, Optional, Callable
 
 # Third-party imports
 import pandas as pd
@@ -19,6 +20,9 @@ from tqdm import tqdm
 # Project imports
 import utils.openai as openai_utils
 import utils.settings as settings
+
+# Set up the logger
+logger = logging.getLogger(__name__)
 
 # ================
 # DEFINING METHODS
@@ -33,6 +37,7 @@ def enrich_conversations_with_summaries_and_tags(
     gpt_model: str = settings.DEFAULT_GPT_MODEL,
     max_parallel_requests: int = settings.MAX_CONCURRENT_OPENAI_REQUESTS,
     show_progress: bool = True,
+    progress_callback: Optional[Callable[[int], None]] = None,
 ) -> pd.DataFrame:
     """
     Enriches a conversations DataFrame with LLM-generated summaries and tags.
@@ -44,6 +49,7 @@ def enrich_conversations_with_summaries_and_tags(
         gpt_model: The GPT model to use for generating summaries and tags
         max_parallel_requests: Maximum number of parallel requests to make to the API
         show_progress: Whether to show a progress bar during processing
+        progress_callback: Optional callback function to report progress. Callback function should accept an integer representing completed items.
 
     Returns:
         DataFrame with added summary and tags columns
@@ -97,6 +103,7 @@ def enrich_conversations_with_summaries_and_tags(
         max_parallel_requests=max_parallel_requests,
         show_progress=show_progress,
         tqdm_label="Enriching conversations with summaries and tags",
+        progress_callback=progress_callback,
     )
 
     # Parse completions into summaries and tags
@@ -128,6 +135,7 @@ def label_conversation_clusters(
     gpt_model: str = settings.DEFAULT_GPT_MODEL,
     max_parallel_requests: int = settings.MAX_CONCURRENT_OPENAI_REQUESTS,
     show_progress: bool = True,
+    progress_callback: Optional[Callable[[int], None]] = None,
 ) -> pd.DataFrame:
     """
     Labels conversation clusters using GPT to analyze centroid conversations and tag counts.
@@ -140,6 +148,7 @@ def label_conversation_clusters(
         gpt_model (str): GPT model to use for labeling
         max_parallel_requests (int): Maximum number of parallel requests to make to OpenAI
         show_progress (bool): Whether to show progress bar
+        progress_callback (Optional[Callable[[int], None]]): Optional callback function to report progress
 
     Returns:
         pd.DataFrame: Copy of clusters_df with additional columns:
@@ -222,6 +231,7 @@ def label_conversation_clusters(
         max_parallel_requests=max_parallel_requests,
         show_progress=show_progress,
         tqdm_label="Labeling conversation clusters",
+        progress_callback=progress_callback,
     )
 
     # Parse completions

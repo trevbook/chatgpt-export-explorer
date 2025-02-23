@@ -156,7 +156,7 @@ export default function ImportTab() {
     >
       {hasData ? (
         <Typography variant="h5" color="primary">
-          You've got data uploaded! 😊
+          You've got processed data! 😊
         </Typography>
       ) : isUploading ? (
         <>
