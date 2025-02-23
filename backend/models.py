@@ -7,9 +7,13 @@ This module defines Pydantic models for the ChatGPT Explorer API responses.
 # =====
 # Below, we'll set up the Pydantic models.
 
+# General imports
+from datetime import datetime
+from typing import List, Dict
+
 # Third-party imports
 from pydantic import BaseModel
-from typing import List, Dict
+
 
 # ===================
 # RESPONSE MODELS
@@ -78,3 +82,22 @@ class ClusteringResults(BaseModel):
 
     clusters: List[ClusterMetrics]
     """List of individual cluster metrics and metadata"""
+
+
+class Conversation(BaseModel):
+    """Model for individual conversation data"""
+
+    conversation_id: str
+    """Unique identifier for this conversation"""
+
+    title: str = "UNTITLED CONVERSATION"
+    """Title of the conversation"""
+
+    cluster_id: str | None = None
+    """Cluster ID to which this conversation belongs"""
+
+    umap_x: float
+    """X coordinate of conversation in UMAP projection"""
+
+    umap_y: float
+    """Y coordinate of conversation in UMAP projection"""

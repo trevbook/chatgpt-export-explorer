@@ -109,3 +109,29 @@ export const getClustersInSolution = async (clusteringSolutionId) => {
     throw error;
   }
 };
+
+/**
+ * Fetches all conversations for a specific clustering solution, including their cluster assignments.
+ * Makes a GET request to /conversations/by-cluster-solution/:clusteringSolutionId.
+ *
+ * @async
+ * @param {string} clusteringSolutionId - The ID of the clustering solution
+ * @returns {Promise<Object[]>} Array of conversations with cluster assignments
+ * @throws {Error} If no conversation data exists or if request fails
+ */
+export const getConversationsByClusterSolution = async (
+  clusteringSolutionId
+) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/conversations/by-cluster-solution/${clusteringSolutionId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      `Error fetching conversations for cluster solution ${clusteringSolutionId}:`,
+      error
+    );
+    throw error;
+  }
+};

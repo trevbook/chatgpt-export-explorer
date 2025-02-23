@@ -13,7 +13,11 @@
 import { useEffect } from "react";
 import { Box, Select, Radio, Group, Text } from "@mantine/core";
 import { useStore } from "../../store";
-import { getClusterSolutions, getClustersInSolution } from "../../api";
+import {
+  getClusterSolutions,
+  getClustersInSolution,
+  getConversationsByClusterSolution,
+} from "../../api";
 import Scatterplot from "./Scatterplot";
 
 // Add this function above the component or in a separate utils file
@@ -34,7 +38,7 @@ function generateSyntheticData(numPoints = 100) {
 }
 
 function transformClusterData(clusterData, view) {
-  if (!clusterData || !clusterData.clusters) return [];
+  if (!clusterData) return [];
 
   if (view === "cluster") {
     console.log(clusterData);
@@ -52,8 +56,16 @@ function transformClusterData(clusterData, view) {
       similarity: cluster.mean_cosine_similarity,
     }));
   } else {
-    // TODO: Return individual documents for document view
-    return generateSyntheticData(clusterData.length);
+    const docs_data = clusterData.map((doc) => ({
+      x: doc.umap_x,
+      y: doc.umap_y,
+      label: doc.title,
+      type: "conversation",
+      size: 10, // Fixed size for documents
+      cluster: doc.cluster_id,
+    }));
+    console.log(docs_data);
+    return docs_data;
   }
 }
 
@@ -97,13 +109,18 @@ export default function TopicMapTab() {
       const cacheKey = `${activeClusterSolutionId}-${scatterplotView}`;
       if (!clusterDataCache[cacheKey]) {
         // Fetch data if not cached
-        getClustersInSolution(activeClusterSolutionId)
+        const fetchPromise =
+          scatterplotView === "cluster"
+            ? getClustersInSolution(activeClusterSolutionId)
+            : getConversationsByClusterSolution(activeClusterSolutionId);
+
+        fetchPromise
           .then((data) => {
-            console.log("Received cluster data:", data);
+            console.log(`Received ${scatterplotView} data:`, data);
             setClusterDataCache(activeClusterSolutionId, scatterplotView, data);
           })
           .catch((err) => {
-            console.error("Error fetching cluster data:", err);
+            console.error(`Error fetching ${scatterplotView} data:`, err);
           });
       }
     }
@@ -216,13 +233,12 @@ export default function TopicMapTab() {
       </Box>
       <Box style={{ display: "flex", gap: "1rem", height: "100%" }}>
         <Box style={{ width: "75%", border: "1px solid blue" }}>
-          <Scatterplot
-            data={
-              clusterData
-                ? transformClusterData(clusterData, scatterplotView)
-                : generateSyntheticData(100) // Fallback data
-            }
-          />
+          {clusterData && (
+            <Scatterplot
+              data={transformClusterData(clusterData, scatterplotView)}
+              colorControl="cluster"
+            />
+          )}
         </Box>
         <Box style={{ width: "25%", border: "1px solid green" }}>info box</Box>
       </Box>

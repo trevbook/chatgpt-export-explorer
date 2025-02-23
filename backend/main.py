@@ -24,7 +24,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # Project imports
 from processing import ProcessingService
 from database import DatabaseManager
-from models import ProcessingStatus, ClusteringResults
+from models import ProcessingStatus, ClusteringResults, Conversation
 
 # Set up the logger
 logger = logging.getLogger(__name__)
@@ -120,3 +120,25 @@ async def get_cluster_solutions() -> List[dict]:
         raise HTTPException(404, "No conversation data found")
     solutions = db.get_cluster_solutions()
     return solutions
+
+
+@app.get("/conversations/by-cluster-solution/{clustering_solution_id}")
+async def get_conversations_by_cluster_solution(
+    clustering_solution_id: str,
+) -> List[Conversation]:
+    """Get all conversations for a given cluster solution, including their cluster assignments
+
+    Args:
+        clustering_solution_id: ID of the cluster solution to get conversations for
+
+    Returns:
+        List[Conversation]: List of conversations with cluster assignments
+
+    Raises:
+        HTTPException: If no conversation data exists in database
+    """
+    if not db.has_data():
+        logger.warning("No conversation data found in database")
+        raise HTTPException(404, "No conversation data found")
+    conversations = db.get_conversations_by_cluster_solution(clustering_solution_id)
+    return conversations

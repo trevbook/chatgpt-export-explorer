@@ -16,7 +16,7 @@ from functools import lru_cache
 from typing import List
 
 # Project imports
-from models import ClusteringResults, ClusterMetrics
+from models import ClusteringResults, Conversation
 
 # Set up the logger
 logger = logging.getLogger(__name__)
@@ -209,3 +209,55 @@ class DatabaseManager:
 
             logger.info(f"Retrieved {len(solutions)} cluster solutions")
             return solutions
+
+    def get_conversations_by_cluster_solution(
+        self, cluster_solution_id: str
+    ) -> List[Conversation]:
+        """
+        Get all conversations for a given cluster solution, including their cluster assignments
+
+        Args:
+            cluster_solution_id (str): ID of the cluster solution to get conversations for
+
+        Returns:
+            List[Conversation]: List of conversations with cluster assignments
+        """
+        logger.debug(
+            f"Getting conversations for cluster solution {cluster_solution_id}"
+        )
+        sqlite3 = get_sqlite3()
+
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT 
+                    c.conversation_id,
+                    c.title,
+                    c.umap_x,
+                    c.umap_y,
+                    cl.cluster_id
+                FROM conversations c
+                LEFT JOIN clusters cl ON cl.cluster_solution_id = ?
+                LEFT JOIN json_each(cl.conversation_ids) as conv_ids
+                WHERE conv_ids.value = c.conversation_id OR conv_ids.value IS NULL
+                """,
+                (cluster_solution_id,),
+            )
+
+            conversations = []
+            for row in cursor.fetchall():
+                conversations.append(
+                    Conversation(
+                        conversation_id=row[0],
+                        title=row[1],
+                        umap_x=row[2],
+                        umap_y=row[3],
+                        cluster_id=row[4],
+                    )
+                )
+
+            logger.info(
+                f"Retrieved {len(conversations)} conversations for cluster solution {cluster_solution_id}"
+            )
+            return conversations
