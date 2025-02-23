@@ -1,15 +1,4 @@
-/**
- * This is the main application component that renders the app.
- *
- * @returns {JSX.Element} The App component
- */
-
-/**
- * ===============
- * COMPONENT SETUP
- * ===============
- * Below, we'll set up the App component.
- */
+// Imports
 import { Box, Loader, Tabs } from "@mantine/core";
 import { useState } from "react";
 import { useStore } from "./store";
@@ -19,12 +8,10 @@ import ImportTab from "./tabs/ImportTab";
 import WelcomeTab from "./tabs/WelcomeTab";
 
 /**
- * ===============
- * RENDERING LOGIC
- * ===============
- * We'll render the App component here.
+ * This is the main application component that renders the app.
+ *
+ * @returns {JSX.Element} The App component
  */
-
 export default function App() {
   const activeTab = useStore((state) => state.activeTab);
   const setActiveTab = useStore((state) => state.setActiveTab);

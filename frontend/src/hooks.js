@@ -1,25 +1,7 @@
-/**
- * Custom hooks for managing application state and side effects.
- * Provides reusable hooks for data checking and related functionality.
- */
-
-/**
- * ===============
- * HOOKS SETUP
- * ===============
- * Below, we'll set up the custom hooks.
- */
-
+// Importing the necessary dependencies
 import { useEffect } from "react";
 import { checkDataExists } from "./api";
 import { useStore } from "./store";
-
-/**
- * ===============
- * HOOKS DEFINITION
- * ===============
- * We'll define the hooks and their logic here.
- */
 
 /**
  * Hook for checking if data exists in the backend.

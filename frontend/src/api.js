@@ -1,28 +1,18 @@
 /**
- * API utilities for interacting with the ChatGPT Explorer backend.
- * Provides functions for checking data existence, uploading files,
- * and retrieving clustering results.
+ * API client for the ChatGPT Explorer backend.
+ * Provides functions for data management, file uploads, and clustering operations.
  */
 
-/**
- * ===============
- * API SETUP
- * ===============
- * Below, we'll set up the API utilities.
- */
-
-// Various imports
+// Imports
 import axios from "axios";
 
-// Extracting the API URL from the environment
+// Extract environment variables
 const API_URL = import.meta.env.VITE_API_URL;
 
-/**
- * ===============
- * API FUNCTIONS
- * ===============
- * We'll define the API functions here.
- */
+// =============
+// API FUNCTIONS
+// =============
+// Below, we'll define a number of functions that interact with the backend API.
 
 /**
  * Checks if any conversation data exists in the backend database.

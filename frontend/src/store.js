@@ -1,27 +1,17 @@
 /**
  * Zustand store for managing global application state.
- * Provides state management for active tab selection and related functionality.
  */
 
-/**
- * ===============
- * STORE SETUP
- * ===============
- * Below, we'll set up the Zustand store.
- */
-
+// Imports
 import { create } from "zustand";
 
-/**
- * ===============
- * STORE DEFINITION
- * ===============
- * We'll define the store and its actions here.
- */
+// ==============
+// STORE CREATION
+// ==============
+// Below, we'll create a store for managing data for the application.
 
 /**
- * Creates a store for managing the active tab state.
- * Provides actions for getting and setting the active tab.
+ * The store for managing global application state.
  *
  * @type {import('zustand').StateCreator}
  */
@@ -51,7 +41,6 @@ export const useStore = create((set) => ({
   // CLUSTER DATA CACHE
   // State for caching cluster data based on solution ID and view
   clusterDataCache: {},
-
   /**
    * Sets the cluster data cache for a specific solution and view.
    *

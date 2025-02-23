@@ -1,3 +1,4 @@
+// Imports
 import { createTheme } from "@mantine/core";
 
 /**
@@ -17,13 +18,13 @@ export const theme = createTheme({
       "#3949AB",
       "#303F9F",
       "#283593",
-      "#1A237E", // Primary color from original theme
+      "#1A237E",
     ],
   },
   fontFamily: "Instrument Sans, sans-serif",
   fontSizes: {
     xs: "12px",
-    sm: "14px", // Base font size from original theme
+    sm: "14px",
     md: "16px",
     lg: "18px",
     xl: "20px",
