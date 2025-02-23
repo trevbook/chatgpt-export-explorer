@@ -65,7 +65,7 @@ export default function App() {
     <Box
       style={{
         width: "100%",
-        height: "95vh",
+        height: "100vh",
         display: "flex",
         flexDirection: "column",
       }}
