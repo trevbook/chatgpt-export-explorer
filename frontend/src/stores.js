@@ -42,4 +42,9 @@ export const useStore = create((set) => ({
   clusterSolutions: [],
   setClusterSolutions: (solutions) => set({ clusterSolutions: solutions }),
   setActiveClusterSolutionId: (id) => set({ activeClusterSolutionId: id }),
+
+  // SCATTERPLOT VIEW
+  // State to manage the selected scatterplot view
+  scatterplotView: "cluster", // default to "cluster"
+  setScatterplotView: (view) => set({ scatterplotView: view }),
 }));

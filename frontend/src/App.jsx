@@ -14,7 +14,7 @@ import { Box, Loader, Tabs } from "@mantine/core";
 import { useState } from "react";
 import { useStore } from "./stores";
 import { useDataCheck } from "./hooks";
-import TopicMapTab from "./tabs/TopicMapTab";
+import TopicMapTab from "./tabs/TopicMapTab/TopicMapTab";
 import ImportTab from "./tabs/ImportTab";
 
 /**
