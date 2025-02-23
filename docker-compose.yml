@@ -1,13 +1,13 @@
 services:
-  # The API service handles all requests from the frontend
-  api:
-    build: ./api
+  # The backend service will serve the FastAPI app
+  backend:
+    build: ./backend
     env_file:
-      - ./api/.env
+      - ./backend/.env
     ports:
       - "8000:8000"
     volumes:
-      - ./api:/app
+      - ./backend:/app
 
   # The frontend service will serve the Next.js app
   frontend:
@@ -20,5 +20,5 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=true
     depends_on:
-      - api
+      - backend
     command: npm run dev -- --host 0.0.0.0
