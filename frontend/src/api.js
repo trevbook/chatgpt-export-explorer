@@ -70,3 +70,16 @@ export const getProcessingStatus = async () => {
   const response = await axios.get(`${API_URL}/processing-status`);
   return response.data;
 };
+
+/**
+ * Fetches the available clustering solutions from the backend.
+ * Makes a GET request to /conversations/cluster-solutions to get all cluster solutions.
+ *
+ * @async
+ * @returns {Promise<Object[]>} Array of cluster solutions, each containing cluster_solution_id and n_clusters
+ * @throws {Error} If no conversation data exists or if request fails
+ */
+export const getClusterSolutions = async () => {
+  const response = await axios.get(`${API_URL}/conversations/cluster-solutions`);
+  return response.data;
+};

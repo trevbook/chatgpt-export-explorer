@@ -11,8 +11,7 @@
  * Below, we'll set up the UploadTab component.
  */
 import { useState, useEffect, useCallback } from "react";
-import { Typography, Box, Paper, CircularProgress } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { Box, Paper, Text, Progress } from "@mantine/core";
 import {
   checkDataExists,
   uploadConversations,
@@ -20,18 +19,24 @@ import {
 } from "../api";
 import { useStore } from "../stores";
 
-const UploadBox = styled(Paper)(({ theme }) => ({
-  border: `2px dashed ${theme.palette.primary.main}`,
-  borderRadius: theme.spacing(2),
-  padding: theme.spacing(4),
-  textAlign: "center",
-  cursor: "pointer",
-  backgroundColor: "transparent",
-  transition: "background-color 0.3s ease",
-  "&:hover": {
-    backgroundColor: theme.palette.action.hover,
-  },
-}));
+const UploadBox = ({ children, ...props }) => (
+  <Paper
+    {...props}
+    p="xl"
+    style={(theme) => ({
+      border: `2px dashed ${theme.primaryColor}`,
+      borderRadius: theme.radius.md,
+      cursor: "pointer",
+      backgroundColor: "transparent",
+      textAlign: "center",
+      "&:hover": {
+        backgroundColor: theme.colors.gray[0],
+      },
+    })}
+  >
+    {children}
+  </Paper>
+);
 
 /**
  * ===============
@@ -145,40 +150,39 @@ export default function ImportTab() {
 
   return (
     <Box
-      sx={{
-        height: "100%",
+      h="100%"
+      style={{
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: 2,
+        gap: "1rem",
       }}
     >
       {hasData ? (
-        <Typography variant="h5" color="primary">
+        <Text size="xl" c="blue">
           You've got processed data! 😊
-        </Typography>
+        </Text>
       ) : isUploading ? (
         <>
-          <CircularProgress variant="determinate" value={uploadProgress} />
-          <Typography>{uploadStatus}</Typography>
-          <Typography>Progress: {uploadProgress}%</Typography>
+          <Progress value={uploadProgress} size="xl" radius="xl" />
+          <Text>{uploadStatus}</Text>
+          <Text>Progress: {uploadProgress}%</Text>
         </>
       ) : (
         <UploadBox
-          elevation={0}
           onClick={handleClick}
           onDragEnter={handleDragIn}
           onDragLeave={handleDragOut}
           onDragOver={handleDrag}
           onDrop={handleDrop}
-          sx={{
-            backgroundColor: isDragging ? "action.hover" : "transparent",
+          style={{
+            backgroundColor: isDragging
+              ? "var(--mantine-color-gray-0)"
+              : "transparent",
           }}
         >
-          <Typography variant="h6">
-            Drag & Drop to Upload conversations.json
-          </Typography>
+          <Text size="lg">Drag & Drop to Upload conversations.json</Text>
         </UploadBox>
       )}
     </Box>

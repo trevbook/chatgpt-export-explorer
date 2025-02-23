@@ -10,7 +10,7 @@
  * ===============
  * Below, we'll set up the App component.
  */
-import { Box, CircularProgress, Tab, Tabs } from "@mui/material";
+import { Box, Loader, Tabs } from "@mantine/core";
 import { useState } from "react";
 import { useStore } from "./stores";
 import { useDataCheck } from "./hooks";
@@ -37,48 +37,48 @@ export default function App() {
     setIsLoading(false);
   }, []);
 
-  const handleTabChange = (event, newValue) => {
+  const handleTabChange = (value) => {
     // Prevent switching away from upload tab if no data exists
-    if (!hasData && newValue !== "upload") {
+    if (!hasData && value !== "upload") {
       return;
     }
-    setActiveTab(newValue);
+    setActiveTab(value);
   };
 
   if (isLoading) {
     return (
       <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        height="100vh"
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
       >
-        <CircularProgress />
+        <Loader />
       </Box>
     );
   }
 
   return (
     <Box
-      sx={{
+      style={{
         width: "100%",
         height: "95vh",
         display: "flex",
         flexDirection: "column",
       }}
     >
-      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-        <Tabs
-          value={activeTab}
-          onChange={handleTabChange}
-          aria-label="chat analysis tabs"
-        >
-          <Tab value="upload" label="Import Data" />
-          <Tab value="topic-map" label="Topic Map" disabled={!hasData} />
-        </Tabs>
-      </Box>
+      <Tabs value={activeTab} onChange={handleTabChange}>
+        <Tabs.List>
+          <Tabs.Tab value="upload">Import Data</Tabs.Tab>
+          <Tabs.Tab value="topic-map" disabled={!hasData}>
+            Topic Map
+          </Tabs.Tab>
+        </Tabs.List>
+      </Tabs>
 
-      <Box sx={{ p: 3, flexGrow: 1, height: 0 }}>
+      <Box style={{ padding: "1rem", flexGrow: 1, height: 0 }}>
         {activeTab === "upload" && <ImportTab />}
         {activeTab === "topic-map" && <TopicMapTab />}
       </Box>

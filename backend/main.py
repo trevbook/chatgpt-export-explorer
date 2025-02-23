@@ -15,9 +15,7 @@ configure_logging()
 # General imports
 import json
 import logging
-from multiprocessing import Process
-import concurrent
-import asyncio
+from typing import List
 
 # Third-party imports
 from fastapi import FastAPI, UploadFile, BackgroundTasks, HTTPException
@@ -102,3 +100,13 @@ async def get_clusters() -> ClusteringResults:
 async def check_data_exists() -> bool:
     """Check if any conversation data exists in the database"""
     return db.has_data()
+
+
+@app.get("/conversations/cluster-solutions")
+async def get_cluster_solutions() -> List[dict]:
+    """Get list of all cluster solutions with their IDs and number of clusters"""
+    if not db.has_data():
+        logger.warning("No conversation data found in database")
+        raise HTTPException(404, "No conversation data found")
+    solutions = db.get_cluster_solutions()
+    return solutions

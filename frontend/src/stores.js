@@ -35,4 +35,11 @@ export const useStore = create((set) => ({
   // Flag indicating if data exists in the backend
   hasData: false,
   setHasData: (value) => set({ hasData: value }),
+
+  // CLUSTER SOLUTION
+  // Data related to the currently-selected / selectable clustering solutions
+  activeClusterSolutionId: null,
+  clusterSolutions: [],
+  setClusterSolutions: (solutions) => set({ clusterSolutions: solutions }),
+  setActiveClusterSolutionId: (id) => set({ activeClusterSolutionId: id }),
 }));

@@ -13,6 +13,7 @@ from pathlib import Path
 import json
 from importlib import import_module
 from functools import lru_cache
+from typing import List
 
 # Project imports
 from models import ClusteringResults
@@ -180,3 +181,30 @@ class DatabaseManager:
             return ClusteringResults(
                 cluster_solution_id=cluster_solution_id, clusters=clusters
             )
+
+    def get_cluster_solutions(self) -> List[dict]:
+        """
+        Get list of all cluster solutions with their IDs and number of clusters
+        """
+        logger.debug("Getting list of cluster solutions")
+        sqlite3 = get_sqlite3()
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT 
+                    cluster_solution_id,
+                    COUNT(DISTINCT cluster_id) as n_clusters
+                FROM clusters
+                GROUP BY cluster_solution_id
+                ORDER BY cluster_solution_id DESC
+            """
+            )
+
+            solutions = [
+                {"cluster_solution_id": row[0], "n_clusters": row[1]}
+                for row in cursor.fetchall()
+            ]
+
+            logger.info(f"Retrieved {len(solutions)} cluster solutions")
+            return solutions
