@@ -28,12 +28,4 @@ RUN poetry config virtualenvs.create false \
 # COPY . .
 
 # Use Gunicorn with single Uvicorn worker, reloading and increased timeouts
-CMD ["gunicorn", "main:app", \
-    "--workers", "1", \
-    "--worker-class", "uvicorn.workers.UvicornWorker", \
-    "--bind", "0.0.0.0:8000", \
-    "--timeout", "1800", \
-    "--graceful-timeout", "300", \
-    "--keep-alive", "5", \
-    "--log-level", "info", \
-    "--reload"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

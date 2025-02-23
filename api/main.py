@@ -82,7 +82,7 @@ async def upload_conversations(
     )
 
 
-@app.get("/status")
+@app.get("/processing-status")
 async def get_processing_status() -> ProcessingStatus:
     """Get current processing status"""
     return processor.get_status()

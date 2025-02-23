@@ -40,3 +40,33 @@ export const checkDataExists = async () => {
     return false;
   }
 };
+
+/**
+ * Uploads a conversations.json file to the backend for processing.
+ *
+ * @async
+ * @param {File} file - The conversations.json file to upload
+ * @returns {Promise<Object>} The initial processing status
+ */
+export const uploadConversations = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await axios.post(`${API_URL}/upload`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};
+
+/**
+ * Gets the current processing status from the backend.
+ *
+ * @async
+ * @returns {Promise<Object>} The current processing status
+ */
+export const getProcessingStatus = async () => {
+  const response = await axios.get(`${API_URL}/processing-status`);
+  return response.data;
+};
