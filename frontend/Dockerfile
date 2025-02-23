@@ -1,24 +1,23 @@
-FROM node:20.17.0-slim
+# Start with the Node image as the base image
+FROM node:20.17.0-alpine
 
+# Set the working directory
 WORKDIR /app
 
-# Copy package files
+# Copy the package.json and package-lock.json files
 COPY package*.json ./
 
-# Install dependencies
+# Install the dependencies
 RUN npm install
 
-# Copy the rest of the application
+# Copy the rest of the files
 COPY . .
 
-# Expose port 3000
-EXPOSE 3000
-
-# Set the environment variable
-ENV WATCHPACK_POLLING=true
-
-# Build the application
+# Build the app
 RUN npm run build
 
-# Start the application
-CMD ["npm", "start"]
+# Expose the port
+EXPOSE 5173
+
+# Command to run the app
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

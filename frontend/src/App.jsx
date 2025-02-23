@@ -1,10 +1,11 @@
-"use client";
 import { useState, useEffect } from "react";
 import { Tabs, Tab, Box, CircularProgress } from "@mui/material";
-import { checkDataExists } from "@/api";
+import { checkDataExists } from "./api";
+import UploadTab from "./tabs/UploadTab";
+import ScatterplotTab from "./tabs/ScatterplotTab";
 
-export default function Home() {
-  const [activeTab, setActiveTab] = useState(0);
+export default function App() {
+  const [activeTab, setActiveTab] = useState("upload");
   const [hasData, setHasData] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -15,7 +16,7 @@ export default function Home() {
         setHasData(exists);
         // If no data exists, force user to upload tab
         if (!exists) {
-          setActiveTab(0);
+          setActiveTab("upload");
         }
       } catch (error) {
         console.error("Error checking data:", error);
@@ -29,7 +30,7 @@ export default function Home() {
 
   const handleTabChange = (event, newValue) => {
     // Prevent switching away from upload tab if no data exists
-    if (!hasData && newValue !== 0) {
+    if (!hasData && newValue !== "upload") {
       return;
     }
     setActiveTab(newValue);
@@ -56,18 +57,14 @@ export default function Home() {
           onChange={handleTabChange}
           aria-label="chat analysis tabs"
         >
-          <Tab label="Upload Data" />
-          <Tab label="Clusters" disabled={!hasData} />
-          <Tab label="Analytics" disabled={!hasData} />
-          <Tab label="Scatterplot" disabled={!hasData} />
+          <Tab value="upload" label="Upload Data" />
+          <Tab value="scatterplot" label="Scatterplot" disabled={!hasData} />
         </Tabs>
       </Box>
 
       <Box sx={{ p: 3 }}>
-        {activeTab === 0 && <div>Upload Data Tab Content</div>}
-        {activeTab === 1 && <div>Clusters Tab Content</div>}
-        {activeTab === 2 && <div>Analytics Tab Content</div>}
-        {activeTab === 3 && <div>Scatterplot Tab Content</div>}
+        {activeTab === "upload" && <UploadTab />}
+        {activeTab === "scatterplot" && <ScatterplotTab />}
       </Box>
     </Box>
   );

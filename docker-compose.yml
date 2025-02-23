@@ -13,15 +13,12 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "3000:3000"
+      - "5173:5173"
     volumes:
       - ./frontend:/app
       - /app/node_modules
-      - /app/.next
     environment:
-      - NODE_ENV=development
-      - WATCHPACK_POLLING=true
       - CHOKIDAR_USEPOLLING=true
     depends_on:
       - api
-    command: npm run dev
+    command: npm run dev -- --host 0.0.0.0

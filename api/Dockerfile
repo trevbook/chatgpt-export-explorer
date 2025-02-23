@@ -27,7 +27,7 @@ RUN poetry config virtualenvs.create false \
 # Copy the application code
 # COPY . .
 
-# Use Gunicorn with single Uvicorn worker and increased timeouts
+# Use Gunicorn with single Uvicorn worker, reloading and increased timeouts
 CMD ["gunicorn", "main:app", \
     "--workers", "1", \
     "--worker-class", "uvicorn.workers.UvicornWorker", \
@@ -35,4 +35,5 @@ CMD ["gunicorn", "main:app", \
     "--timeout", "1800", \
     "--graceful-timeout", "300", \
     "--keep-alive", "5", \
-    "--log-level", "info"]
+    "--log-level", "info", \
+    "--reload"]
